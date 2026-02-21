@@ -1,0 +1,12 @@
+{
+    "version": 2,
+    "outputDirectory": "webapp/react-frontend/dist",
+    "buildCommand": "cd webapp/react-frontend && npm install && npm run build",
+    "installCommand": "echo 'Skipping root install'",
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
+        }
+    ]
+}
