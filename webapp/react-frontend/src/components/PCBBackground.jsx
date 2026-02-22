@@ -69,18 +69,16 @@ export default function PCBBackground() {
 
                     return (
                         <g key={i}>
-                            {/* The invisible track, just provides the animated stroke */}
+                            {/* Smooth pulsing line instead of the laggy moving dash */}
                             <path
                                 d={d}
                                 fill="none"
                                 stroke="url(#signalGlow)"
                                 strokeWidth="60"
                                 strokeLinecap="round"
-                                filter="url(#neon)"
                                 transform="matrix(0.1, 0, 0, -0.1, 0, 2100)"
                                 style={{
-                                    strokeDasharray: '400 6000', // A short 400px dash, followed by 6000px gap
-                                    animation: `dashAnim ${duration}s linear infinite`,
+                                    animation: `smoothPulse ${duration}s ease-in-out infinite`,
                                     animationDelay: `-${delay}s`
                                 }}
                             />
@@ -90,12 +88,12 @@ export default function PCBBackground() {
             </svg>
 
             <style>{`
-                @keyframes dashAnim {
-                    0% {
-                        stroke-dashoffset: 6400;
+                @keyframes smoothPulse {
+                    0%, 100% {
+                        opacity: 0.05;
                     }
-                    100% {
-                        stroke-dashoffset: 0;
+                    50% {
+                        opacity: 0.6;
                     }
                 }
             `}</style>

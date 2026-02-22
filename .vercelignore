@@ -1,0 +1,12 @@
+data/
+output/
+images/
+gui_test/
+tests/
+.venv/
+__pycache__/
+wget-log
+*.ipynb
+*.mp4
+yolo11m.pt
+yolo11n.pt

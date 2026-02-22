@@ -1,10 +1,11 @@
 # Core - Latest versions
 ultralytics>=8.3.0  # YOLO11 support
-torch>=2.2.0
-torchvision>=0.17.0
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.2.0+cpu
+torchvision==0.17.0+cpu
 
 # Image processing
-opencv-python>=4.9.0
+opencv-python-headless>=4.9.0
 Pillow>=10.2.0
 
 # Data

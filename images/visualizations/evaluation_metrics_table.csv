@@ -1,0 +1,7 @@
+Defect Class,Precision,Recall,F1-Score,Accuracy
+missing_hole,0.914,0.856,0.884,0.975
+mouse_bite,0.966,0.937,0.951,0.919
+open_circuit,0.946,0.91,0.928,0.916
+short,0.934,0.921,0.927,0.917
+spur,0.894,0.852,0.873,0.927
+spurious_copper,0.894,0.947,0.92,0.947
