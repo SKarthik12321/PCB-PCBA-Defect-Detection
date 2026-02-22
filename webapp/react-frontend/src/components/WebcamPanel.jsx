@@ -44,7 +44,8 @@ export default function WebcamPanel({ modelStatus }) {
             c.getContext('2d').drawImage(v, 0, 0)
             c.toBlob(async blob => {
                 try {
-                    const res = await fetch('/api/detect-frame', { method: 'POST', body: blob })
+                    const apiUrl = import.meta.env.VITE_API_URL || '';
+                    const res = await fetch(`${apiUrl}/api/detect-frame`, { method: 'POST', body: blob })
                     if (res.ok) {
                         const metaHeader = res.headers.get('x-detection-meta')
                         if (metaHeader) {

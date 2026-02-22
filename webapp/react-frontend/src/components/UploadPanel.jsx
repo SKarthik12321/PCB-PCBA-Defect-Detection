@@ -29,7 +29,8 @@ export default function UploadPanel({ modelStatus }) {
         form.append('file', file, file.name)
 
         try {
-            const res = await fetch('/api/detect-upload', { method: 'POST', body: form })
+            const apiUrl = import.meta.env.VITE_API_URL || '';
+            const res = await fetch(`${apiUrl}/api/detect-upload`, { method: 'POST', body: form })
             if (!res.ok) {
                 let j = null
                 try { j = await res.json() } catch { }

@@ -16,7 +16,8 @@ export default function App() {
   })
 
   useEffect(() => {
-    fetch('/api/model-status')
+    const apiUrl = import.meta.env.VITE_API_URL || '';
+    fetch(`${apiUrl}/api/model-status`)
       .then(r => r.json())
       .then(data => setModelStatus(data))
       .catch(() => setModelStatus({ has_pcb_model: false, model_name: 'Unavailable', ready: false }))
