@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GACGDF Diagram Suite</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-deep: #ffffff;
+            --bg-card: #ffffff;
+            --border: none;
+            --accent-primary: #047857;
+            --accent-secondary: #1d4ed8;
+            --text-main: #000000;
+            --text-dim: #000000;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: #000000;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 150px;
+            align-items: center;
+        }
+
+        .diagram-container {
+            width: 100%;
+            max-width: 1600px;
+            background: #ffffff;
+            border: none;
+            padding: 80px;
+            box-shadow: none;
+        }
+
+        h2 {
+            font-size: 2.8rem;
+            margin-bottom: 4rem;
+            color: #000000;
+            font-weight: 800;
+            border-bottom: 6px solid var(--accent-primary);
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        /* Mermaid Customization */
+        .mermaid {
+            background: white !important;
+            font-size: 1.8rem !important;
+        }
+
+        /* Override Mermaid internal styles for flat white mode */
+        .node rect, .node circle, .node ellipse, .node polygon, .node path {
+            fill: #ffffff !important;
+            stroke: #000000 !important;
+            stroke-width: 3px !important;
+        }
+
+        .label {
+            color: #000000 !important;
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 700 !important;
+            font-size: 1.6rem !important;
+        }
+
+        .edgePath .path {
+            stroke: #000000 !important;
+            stroke-width: 3px !important;
+        }
+
+        .marker {
+            fill: var(--text-dim) !important;
+            stroke: var(--text-dim) !important;
+        }
+
+        .actor {
+            fill: #1e293b !important;
+            stroke: var(--accent-secondary) !important;
+        }
+
+        .messageLine0, .messageLine1 {
+            stroke: var(--text-dim) !important;
+        }
+
+        #mermaid-svg-1 {
+            max-width: 100% !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="diagram-container" id="uml-class">
+        <h2>01. UML Class Diagram - GACGDF Model Architecture</h2>
+        <pre class="mermaid">
+        classDiagram
+            class GACGDFModel {
+                +backbone : GeometryBackbone
+                +dacsr : DACModule
+                +neck : CARFTNeck
+                +head : DetectionHead
+                +loss : GradBalancedLoss
+                +forward(x)
+                +train_step(batch)
+            }
+
+            class GeometryBackbone {
+                -n_stages : int
+                -channel_widths : list
+                +extract_features(x)
+            }
+
+            class DACModule {
+                -alpha : float
+                -beta : float
+                +fuse_multi_scale(features)
+            }
+
+            class CARFTNeck {
+                -transformer_blocks : int
+                -n_heads : int
+                +context_aware_tuning(f)
+            }
+
+            class DetectionHead {
+                -n_classes : int
+                -anchors : tensor
+                +predict(f)
+            }
+
+            class GradBalancedLoss {
+                -w_cls : float
+                -w_box : float
+                +compute_loss(preds, targets)
+            }
+
+            GACGDFModel *-- GeometryBackbone
+            GACGDFModel *-- DACModule
+            GACGDFModel *-- CARFTNeck
+            GACGDFModel *-- DetectionHead
+            GACGDFModel *-- GradBalancedLoss
+        </pre>
+    </div>
+
+    <div class="diagram-container" id="sequence">
+        <h2>02. Sequence Diagram - Inference & Inspection Pipeline</h2>
+        <pre class="mermaid">
+        sequenceDiagram
+            autonumber
+            actor U as PCB Manufacturer
+            participant B as Backend (FastAPI)
+            participant D as PCBDetector
+            participant M as GACGDFModel
+            participant V as Visualizer
+
+            U->>B: Upload PCB Image
+            B->>D: invoke predict(image_path)
+            D->>M: preprocess & forward(tensor)
+            M->>M: 1. Extract Geo-Spatial Features
+            M->>M: 2. Multi-Scale Fusion (DACSR)
+            M->>M: 3. Contextual Tuning (CARFT)
+            M->>D: Return BBox & Classes
+            D->>V: Apply NMS & Overlay Labels
+            V->>B: Final Annotated Image
+            B->>U: Display Inspection Results
+        </pre>
+    </div>
+
+    <div class="diagram-container" id="use-case">
+        <h2>03. Use Case Diagram - System Interactions</h2>
+        <pre class="mermaid">
+        graph TD
+            subgraph Actors
+                M[PCB Manufacturer]
+                Q[Quality Engineer]
+                S[GACGDF System]
+            end
+
+            subgraph "PCB Defect Detection System"
+                UC1(Upload PCB/PCBA Image)
+                UC2(Run Real-time Inspection)
+                UC3(Analyze Detection Results)
+                UC4(Export Performance Report)
+                UC5(Retrain Model / Fine-tune)
+                UC6(Configure Thresholds)
+            end
+
+            M --> UC1
+            M --> UC3
+            UC1 --> UC2
+            UC2 --> S
+            Q --> UC3
+            Q --> UC4
+            Q --> UC5
+            Q --> UC6
+            UC3 -.-> UC2
+        </pre>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            securityLevel: 'loose',
+            fontFamily: 'Inter',
+            fontSize: 28,
+            flowchart: { useMaxWidth: false, htmlLabels: true, curve: 'basis' },
+            sequence: { useMaxWidth: false, showSequenceNumbers: true, fontSize: 24, actorFontSize: 24, messageFontSize: 20 },
+            class: { useMaxWidth: false, fontSize: 24 }
+        });
+    </script>
+</body>
+</html>

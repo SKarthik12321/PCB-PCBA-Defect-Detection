@@ -1,4 +1,13 @@
-"""Main entry point for PCB Defect Detection System."""
+"""
+================================================================================
+FILE: src/main.py
+ROLE: Command Line Interface (CLI) Master
+PURPOSE: This file powers the terminal commands if you decide not to use `train_local.py`.
+It uses 'argparse' to act as a router so you can run terminal commands like:
+`python src/main.py train --epochs 50` or `python src/main.py detect my_image.jpg`.
+It simply receives user text input, parses it, and routes it to the corresponding python class.
+================================================================================
+"""
 
 import argparse
 from pathlib import Path

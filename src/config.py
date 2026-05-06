@@ -1,4 +1,14 @@
-"""Configuration for PCB Defect Detection System."""
+"""
+================================================================================
+FILE: src/config.py
+ROLE: Central Configuration Hub
+PURPOSE: This file acts as the ultimate source of truth for the entire PCB Defect
+Detection system. It stores all the hardcoded paths, YOLO11 hyperparameters
+(like epochs, batch size, learning rates), and the explicit class mapping for 
+the 6 different defect types (missing_hole, mouse_bite, open_circuit, short, spur, spurious_copper).
+If you need to change how the model trains or where data is saved, you do it here.
+================================================================================
+"""
 
 import os
 from dataclasses import dataclass

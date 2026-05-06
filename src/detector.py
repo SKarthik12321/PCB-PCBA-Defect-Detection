@@ -1,4 +1,15 @@
-"""Inference module for PCB Defect Detection."""
+"""
+================================================================================
+FILE: src/detector.py
+ROLE: The Inference / Defect Identification Engine
+PURPOSE: This file is used strictly AFTER the model has been completely trained.
+It contains the 'PCBInspector' class which handles the task of Defect Identification.
+It takes a raw, unseen image, passes it into the heavy PyTorch Neural Network, extracts
+the raw coordinate tensor predictions from the CNN, and cleanly packages them into
+structured dictionaries so the web app or command line can read exactly what defects
+where found and where the boxes are located.
+================================================================================
+"""
 
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union

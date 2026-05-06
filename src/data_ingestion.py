@@ -1,4 +1,15 @@
-"""Data ingestion and conversion for PCB Defect Detection with YOLO11."""
+"""
+================================================================================
+FILE: src/data_ingestion.py
+ROLE: Dataset Parsing and Processing
+PURPOSE: This file handles all data preparation before the AI can train.
+Kaggle PCB data comes as images paired with massive XML text files which define where
+the defects are (Absolute Pixel Coordinates). YOLO cannot read XML. This script physically
+copies the images into a YOLO-friendly folder structure, and converts the XML boxes into
+YOLO .txt files (Relative Normalized Coordinates). It also randomly divides the massive
+dataset into 80% 'train' images and 20% 'val' (test) images to prevent overfitting.
+================================================================================
+"""
 
 import random
 import shutil
@@ -15,6 +26,7 @@ from src.utils import find_image_file, get_logger
 logger = get_logger(__name__)
 
 
+# @dataclass automatically generates boilerplate code like __init__() and __repr__() for purely data-holding classes
 @dataclass
 class ImageItem:
     """Represents an image with its metadata."""
@@ -26,7 +38,10 @@ class ImageItem:
 
 class VOCConverter:
     """VOC XML to YOLO format converter."""
+    # This class handles the mathematical translation from Absolute Pixel Coordinates (VOC XML) to Relative Normalized Coordinates (YOLO format)
     
+    # @staticmethod is used here because this function acts as a pure mathematical utility
+    # It does not need access to 'self' (class instance variables) to do its job
     @staticmethod
     def convert(
         xml_path: Path,
@@ -43,6 +58,7 @@ class VOCConverter:
         Returns:
             List of YOLO format lines
         """
+        # Parse the XML file into an ElementTree object to easily traverse the DOM nodes (like <object> and <bndbox>)
         tree = ET.parse(xml_path)
         root = tree.getroot()
         
@@ -53,21 +69,23 @@ class VOCConverter:
                 logger.warning(f"Unknown class ignored: {class_name}")
                 continue
             
+            # Map the text class name to the integer class ID defined in config.py
             class_id = Config.CLASS_MAP[class_name]
             bbox = obj.find("bndbox")
             
-            # Extract and normalize coordinates
+            # Extract and clamp pixel coordinates to ensure they don't exceed image boundaries
             xmin = VOCConverter._clamp(float(bbox.find("xmin").text), 0, img_width)
             ymin = VOCConverter._clamp(float(bbox.find("ymin").text), 0, img_height)
             xmax = VOCConverter._clamp(float(bbox.find("xmax").text), 0, img_width)
             ymax = VOCConverter._clamp(float(bbox.find("ymax").text), 0, img_height)
             
-            # Convert to YOLO format (normalized center + dimensions)
+            # Calculate YOLO relative center point (x,y) and relative width/height as percentages (0.0 to 1.0)
             x_center = (xmin + xmax) / 2 / img_width
             y_center = (ymin + ymax) / 2 / img_height
             width = (xmax - xmin) / img_width
             height = (ymax - ymin) / img_height
             
+            # Only append valid bounding boxes that actually have an area
             if width > 0 and height > 0:
                 yolo_lines.append(
                     f"{class_id} {x_center:.6f} {y_center:.6f} {width:.6f} {height:.6f}"
@@ -75,6 +93,7 @@ class VOCConverter:
         
         return yolo_lines
     
+    # @staticmethod is used because clamping a raw number is a universal utility independent of object state
     @staticmethod
     def _clamp(value: float, min_val: float, max_val: float) -> float:
         """Clamp a value between min and max."""
@@ -85,6 +104,7 @@ class DataIngestion:
     """Manages data loading and conversion to YOLO format."""
     
     def __init__(self, data_path: Optional[Path] = None):
+        # Resolve target raw data path and target YOLO destination path
         self.data_path = Path(data_path) if data_path else Config.get_data_path()
         self.yolo_path = Config.get_yolo_dataset_path()
         self.images_dir: Optional[Path] = None
@@ -93,6 +113,7 @@ class DataIngestion:
     
     def find_data_structure(self) -> bool:
         """Search for images and annotations in the dataset."""
+        # Find exactly where the Kaggle dataset was structured upon extraction
         logger.info(f"Searching in: {self.data_path}")
         
         # Debug: list structure
@@ -176,10 +197,11 @@ class DataIngestion:
     
     def collect_images(self) -> List[ImageItem]:
         """Collect all images with their annotations."""
+        # Initialize an empty master list to track all valid dataset items found
         self.all_images = []
         seen_images = set()
         
-        # Collect via XML annotations (priority)
+        # Prioritize collecting data mapped to valid XML coordinate data
         if self.annot_dir and self.annot_dir.exists():
             self._collect_from_xml(seen_images)
         
@@ -287,7 +309,7 @@ class DataIngestion:
             (self.yolo_path / "images" / split).mkdir(parents=True, exist_ok=True)
             (self.yolo_path / "labels" / split).mkdir(parents=True, exist_ok=True)
         
-        # Shuffle and split
+        # Shuffle and slice 20% of data for isolated testing/validation to prevent overfitting
         random.seed(Config.data.random_seed)
         shuffled = self.all_images.copy()
         random.shuffle(shuffled)
@@ -332,10 +354,11 @@ class DataIngestion:
             dst_img = self.yolo_path / "images" / split / item.image_path.name
             shutil.copy(item.image_path, dst_img)
             
-            # Create label
+            # Reconstruct the string path for the YOLO output label file
             label_path = self.yolo_path / "labels" / split / f"{item.image_path.stem}.txt"
             
             if item.source_type == "xml" and item.annotation_path:
+                # Convert the raw XML bounding boxes into PyTorch native coordinates
                 yolo_lines = VOCConverter.convert(
                     item.annotation_path, img_width, img_height
                 )
@@ -358,6 +381,7 @@ class DataIngestion:
     
     def _create_yaml_config(self) -> Path:
         """Create YOLO dataset YAML configuration."""
+        # Write the critical dataset.yaml file that YOLO consumes to understand folder locations and class lists
         yaml_content = f"""path: {self.yolo_path}
 train: images/train
 val: images/val

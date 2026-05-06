@@ -1,4 +1,14 @@
-"""Utility functions for PCB Defect Detection."""
+"""
+================================================================================
+FILE: src/utils.py
+ROLE: Global Utilities and Helper Functions
+PURPOSE: This file contains generic, reusable Python functions that are shared
+across the entire project. Instead of writing the same code 10 times, other files
+import functions from here to do things like: traverse directories looking for images
+(find_directory_with_files), format metric outputs nicely for the terminal, and
+instantiate global loggers. It does not run deep learning natively.
+================================================================================
+"""
 
 import os
 import sys
